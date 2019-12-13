@@ -7,9 +7,11 @@ class Innovation(arcade.Window):
     def __init__(self, width, height):
         super().__init__(width, height)
         self.octave = getOctave()
+        self.chords = getChords()
         self.points = 0
         self.randomTone()
-        self.mode = "challenge"
+        self.modes = ["challenge", "free mode", "chord mode"]
+        self.mode = 1
 
     def update(self, delta_time):
         pass
@@ -17,27 +19,27 @@ class Innovation(arcade.Window):
     def on_draw(self):
         arcade.start_render()
         arcade.draw_text(str(self.points) + " pts", width / 2, height / 3, arcade.color.WHITE, 15)
-        if self.mode == "challenge":
+        if self.modes[self.mode%len(self.modes)] == "challenge":
             arcade.draw_text("Press {}".format(self.toneChoice.key), width / 2, height / 2, arcade.color.WHITE, 20)
-        arcade.draw_text("Press 'X' to go out of {}".format(self.mode), width / 2, height / 3.5, arcade.color.WHITE, 20)
+        arcade.draw_text("Press 'X' to go out of {}".format(self.modes[self.mode%len(self.modes)]), width / 2, height / 3.5, arcade.color.WHITE, 20)
 
     def on_key_press(self, key, modifiers):
-        if self.mode == "challenge":
-            if self.toneChoice.isButtonPressed(key):
+        if self.modes[self.mode%len(self.modes)] == "challenge":
+            if self.toneChoice.isChordPressed(key):
                 arcade.play_sound(self.toneChoice.sound)
                 self.points += 1
                 self.randomTone()
 
-        if self.mode == "free mode":
+        if self.modes[self.mode%len(self.modes)] == "free mode":
             for tone in self.octave:
-                if tone.isButtonPressed(key):
+                if tone.isChordPressed(key):
                     arcade.play_sound(tone.sound)
 
+        if self.modes[self.mode%len(self.modes)] == "chord mode":
+            pass
+
         if (key == arcade.key.X):
-            if self.mode == "challenge":
-                self.mode = "free mode"
-            elif self.mode == "free mode":
-                self.mode = "challenge"
+            self.mode += 1
 
 
     def randomTone(self):
@@ -50,8 +52,33 @@ class Tone:
         self.button = button
         self.sound = arcade.load_sound(sound)
 
-    def isButtonPressed(self, button):
+    def isChordPressed(self, button):
         return self.button == button
+
+
+class Chord:
+    def __init__(self, keys, buttons, sounds):
+        self.keys = []
+        self.buttons = []
+        self.buttonsState = []
+        self.sounds = []
+
+        for _button in self.buttons:
+            self.buttonsState.append(False)
+    
+    def timer(self, delta_time):
+        pass
+
+    def keyPressedChord(self, button):
+        if button in self.buttons:
+            self.buttons[self.buttons.index(button)] = True
+
+    def keyReleasedChord(self, button):
+        if button in self.buttons:
+            self.buttons[self.buttons.index(button)] = False
+
+    def isChordPressed(self):
+        pass
 
 
 def getOctave():
@@ -70,6 +97,9 @@ def getOctave():
         Tone("B",  arcade.key.R,     "sounds/s12.wav"),
     ]
 
+
+def getChords():
+    pass
 
 mitSpil = Innovation(width, height)
 arcade.run()
