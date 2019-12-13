@@ -7,43 +7,59 @@ class Innovation(arcade.Window):
     def __init__(self, width, height):
         super().__init__(width, height)
         self.octave = getOctave()
-        self.chords = getChords()
+        self.chords = getChords(self.octave)
         self.points = 0
         self.randomTone()
+        self.randomChord()
         self.modes = ["challenge", "free mode", "chord mode"]
         self.mode = 1
 
     def update(self, delta_time):
-        pass
+        self.chordChoice.timer(delta_time)
 
     def on_draw(self):
         arcade.start_render()
         arcade.draw_text(str(self.points) + " pts", width / 2, height / 3, arcade.color.WHITE, 15)
         if self.modes[self.mode%len(self.modes)] == "challenge":
             arcade.draw_text("Press {}".format(self.toneChoice.key), width / 2, height / 2, arcade.color.WHITE, 20)
+        elif self.modes[self.mode%len(self.modes)] == "chord mode":
+            arcade.draw_text("Press {}".format(self.chordChoice.keys), width / 2, height / 2 - 20, arcade.color.WHITE, 20)
         arcade.draw_text("Press 'X' to go out of {}".format(self.modes[self.mode%len(self.modes)]), width / 2, height / 3.5, arcade.color.WHITE, 20)
 
     def on_key_press(self, key, modifiers):
         if self.modes[self.mode%len(self.modes)] == "challenge":
-            if self.toneChoice.isChordPressed(key):
+            if self.toneChoice.isTonePressed(key):
                 arcade.play_sound(self.toneChoice.sound)
                 self.points += 1
                 self.randomTone()
+        
 
         if self.modes[self.mode%len(self.modes)] == "free mode":
             for tone in self.octave:
-                if tone.isChordPressed(key):
+                if tone.isTonePressed(key):
                     arcade.play_sound(tone.sound)
 
         if self.modes[self.mode%len(self.modes)] == "chord mode":
-            pass
+            self.chordChoice.keyPressedChord(key)
+            if self.chordChoice.isChordPressed():
+                self.chordChoice.playSounds()
+                self.points += 1
+                self.randomChord()
 
         if (key == arcade.key.X):
             self.mode += 1
 
 
+    def on_key_release(self, key, modifier):
+        if self.modes[self.mode%len(self.modes)] == "chord mode":
+            self.chordChoice.keyReleasedChord(key)
+
+
     def randomTone(self):
         self.toneChoice = random.choice(self.octave)
+    
+    def randomChord(self):
+        self.chordChoice = random.choice(self.chords)
 
 
 class Tone:
@@ -52,33 +68,43 @@ class Tone:
         self.button = button
         self.sound = arcade.load_sound(sound)
 
-    def isChordPressed(self, button):
+    def isTonePressed(self, button):
         return self.button == button
 
 
 class Chord:
     def __init__(self, keys, buttons, sounds):
-        self.keys = []
-        self.buttons = []
+        self.keys = keys
+        self.buttons = buttons
         self.buttonsState = []
-        self.sounds = []
+        self.sounds = sounds
+        self.timerIsDone = False
+        self.countTime = 0.4
+        self.counter = 0
 
         for _button in self.buttons:
             self.buttonsState.append(False)
-    
     def timer(self, delta_time):
-        pass
+        self.counter += delta_time
+        self.timerIsDone = self.counter > self.countTime
+
+        if True not in self.buttonsState:
+            self.counter = 0
 
     def keyPressedChord(self, button):
         if button in self.buttons:
-            self.buttons[self.buttons.index(button)] = True
+            self.buttonsState[self.buttons.index(button)] = True
 
     def keyReleasedChord(self, button):
         if button in self.buttons:
-            self.buttons[self.buttons.index(button)] = False
+            self.buttonsState[self.buttons.index(button)] = False
+
+    def playSounds(self):
+        for sound in self.sounds:
+            arcade.play_sound(sound)
 
     def isChordPressed(self):
-        pass
+        return (not self.timerIsDone and False not in self.buttonsState)
 
 
 def getOctave():
@@ -98,8 +124,23 @@ def getOctave():
     ]
 
 
-def getChords():
-    pass
+def getChords(octaves):
+    chords = []
+    for i in range(12):
+        keys = []
+        buttons = []
+        sounds = []
+        for n in range(3):
+            if i + n*3 >= 12:
+                i -= 12
+            keys.append(octaves[i + n*3].key)
+            buttons.append(octaves[i + n*3].button)
+            sounds.append(octaves[i + n*3].sound)
+        chord = Chord(keys, buttons, sounds)
+        chords.append(chord)
+    return chords
+
+
 
 mitSpil = Innovation(width, height)
 arcade.run()
