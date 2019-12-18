@@ -23,7 +23,7 @@ class Innovation(arcade.Window):
         if self.modes[self.mode%len(self.modes)] == "challenge":
             arcade.draw_text("Press {}".format(self.toneChoice.key), width / 2, height / 2, arcade.color.WHITE, 20)
         elif self.modes[self.mode%len(self.modes)] == "chord mode":
-            arcade.draw_text("Press {}".format(self.chordChoice.keys), width / 2, height / 2 - 20, arcade.color.WHITE, 20)
+            arcade.draw_text("Press {}".format(self.chordChoice.chordName), width / 2, height / 2 - 20, arcade.color.WHITE, 20)
         arcade.draw_text("Press 'X' to go out of {}".format(self.modes[self.mode%len(self.modes)]), width / 2, height / 3.5, arcade.color.WHITE, 20)
 
     def on_key_press(self, key, modifiers):
@@ -73,10 +73,11 @@ class Tone:
 
 
 class Chord:
-    def __init__(self, keys, buttons, sounds):
+    def __init__(self, keys, buttons, sounds, chordName="fejl"):
         self.keys = keys
         self.buttons = buttons
         self.buttonsState = []
+        self.chordName = chordName
         self.sounds = sounds
         self.timerIsDone = False
         self.countTime = 0.4
@@ -126,17 +127,19 @@ def getOctave():
 
 def getChords(octaves):
     chords = []
+    steps = [0, 4, 7]
     for i in range(12):
         keys = []
         buttons = []
         sounds = []
+        chordName = "{} major".format(octaves[i].key)
         for n in range(3):
-            if i + n*3 >= 12:
+            if i + steps[n] >= 12:
                 i -= 12
-            keys.append(octaves[i + n*3].key)
-            buttons.append(octaves[i + n*3].button)
-            sounds.append(octaves[i + n*3].sound)
-        chord = Chord(keys, buttons, sounds)
+            keys.append(octaves[i + steps[n]].key)
+            buttons.append(octaves[i + steps[n]].button)
+            sounds.append(octaves[i + steps[n]].sound)
+        chord = Chord(keys, buttons, sounds, chordName)
         chords.append(chord)
     return chords
 
