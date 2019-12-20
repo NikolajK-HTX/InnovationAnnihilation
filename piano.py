@@ -63,10 +63,11 @@ class Innovation(arcade.Window):
 
 
 class Tone:
-    def __init__(self, key, button, sound):
+    def __init__(self, key, button, sound, type):
         self.key = key
         self.button = button
         self.sound = arcade.load_sound(sound)
+        self.type = type
 
     def isTonePressed(self, button):
         return self.button == button
@@ -110,18 +111,18 @@ class Chord:
 
 def getOctave():
     return [
-        Tone("C",  arcade.key.UP,    "sounds/s1.wav"), 
-        Tone("C#", arcade.key.RIGHT, "sounds/s2.wav"),
-        Tone("D",  arcade.key.DOWN,  "sounds/s3.wav"),
-        Tone("D#", arcade.key.LEFT,  "sounds/s4.wav"),
-        Tone("E",  arcade.key.SPACE, "sounds/s5.wav"),
-        Tone("F",  arcade.key.W,     "sounds/s6.wav"),
-        Tone("F#", arcade.key.A,     "sounds/s7.wav"),
-        Tone("G",  arcade.key.S,     "sounds/s8.wav"),
-        Tone("G#", arcade.key.D,     "sounds/s9.wav"),
-        Tone("A",  arcade.key.F,     "sounds/s10.wav"),
-        Tone("A#", arcade.key.G,     "sounds/s11.wav"),
-        Tone("B",  arcade.key.R,     "sounds/s12.wav"),
+        Tone("C",  arcade.key.UP,    "sounds/s1.wav",  1), 
+        Tone("C#", arcade.key.RIGHT, "sounds/s2.wav",  2),
+        Tone("D",  arcade.key.DOWN,  "sounds/s3.wav",  1),
+        Tone("D#", arcade.key.LEFT,  "sounds/s4.wav",  2),
+        Tone("E",  arcade.key.SPACE, "sounds/s5.wav",  1),
+        Tone("F",  arcade.key.W,     "sounds/s6.wav",  1),
+        Tone("F#", arcade.key.A,     "sounds/s7.wav",  2),
+        Tone("G",  arcade.key.S,     "sounds/s8.wav",  1),
+        Tone("G#", arcade.key.D,     "sounds/s9.wav",  2),
+        Tone("A",  arcade.key.F,     "sounds/s10.wav", 1),
+        Tone("A#", arcade.key.G,     "sounds/s11.wav", 2),
+        Tone("B",  arcade.key.R,     "sounds/s12.wav", 1),
     ]
 
 
