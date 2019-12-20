@@ -85,7 +85,6 @@ class Tone:
         return self.pressed
     
     def fixStuff(self, button):
-        print("shii " + self.key)
         self.pressed = self.button != button
 
 
@@ -133,18 +132,20 @@ class Piano2:
         self.width = width
         self.height = height
 
-    def display(self):
+    def display1(self):
         if self.correspondingTone.type == 1:
             print()
             if self.correspondingTone.pressed:
                 arcade.draw_rectangle_filled(self.x, self.y, self.width, self.height, arcade.color.GRAY)
             else:
                 arcade.draw_rectangle_filled(self.x, self.y, self.width/1.03, self.height, arcade.color.WHITE)
+    def display2(self):
         if self.correspondingTone.type == 2:
             if self.correspondingTone.pressed:
-                arcade.draw_rectangle_filled(self.x, self.y + 50, self.width/1.2, self.height/2, arcade.color.WHITE)
+                arcade.draw_rectangle_filled(self.x, self.y + 50, self.width/1.4, self.height/2, arcade.color.GRAY_ASPARAGUS)
             else:
-                arcade.draw_rectangle_outline(self.x, self.y + 50, self.width/1.2, self.height/2, arcade.color.GRAY)
+                arcade.draw_rectangle_filled(self.x, self.y + 50, self.width/1.4, self.height/2, arcade.color.BLACK)
+                arcade.draw_rectangle_outline(self.x, self.y + 50, self.width/1.4, self.height/2, arcade.color.WHITE)
             
 
 class Piano:
@@ -155,13 +156,18 @@ class Piano:
         width = 50
         counter = 0
         for x in octave:
-            self.toneX = self.x + width * counter
+            if x.type == 1:
+                self.toneX = self.x + (width+5) * counter
+                counter += 1
+            else:
+                self.toneX = self.x + (width+5) * counter - width/2
             self.listPiano2.append(Piano2(x, self.toneX, self.y, width, 200))
-            counter += 1
     
     def display(self):
         for pianoTile in self.listPiano2:
-            pianoTile.display()
+            pianoTile.display1()
+        for pianoTile in self.listPiano2:
+            pianoTile.display2()
         
 
 
