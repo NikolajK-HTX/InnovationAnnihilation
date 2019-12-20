@@ -13,6 +13,7 @@ class Innovation(arcade.Window):
         self.randomChord()
         self.modes = ["challenge", "free mode", "chord mode"]
         self.mode = 1
+        self.piano = Piano(100, height / 1.4, self.octave)
 
     def update(self, delta_time):
         self.chordChoice.timer(delta_time)
@@ -25,6 +26,7 @@ class Innovation(arcade.Window):
         elif self.modes[self.mode%len(self.modes)] == "chord mode":
             arcade.draw_text("Press {}".format(self.chordChoice.chordName), width / 2, height / 2 - 20, arcade.color.WHITE, 20)
         arcade.draw_text("Press 'X' to go out of {}".format(self.modes[self.mode%len(self.modes)]), width / 2, height / 3.5, arcade.color.WHITE, 20)
+        self.piano.display()
 
     def on_key_press(self, key, modifiers):
         if self.modes[self.mode%len(self.modes)] == "challenge":
@@ -32,12 +34,12 @@ class Innovation(arcade.Window):
                 arcade.play_sound(self.toneChoice.sound)
                 self.points += 1
                 self.randomTone()
-        
 
         if self.modes[self.mode%len(self.modes)] == "free mode":
             for tone in self.octave:
-                if tone.isTonePressed(key):
-                    arcade.play_sound(tone.sound)
+                if not tone.pressed:
+                    if tone.isTonePressed(key):
+                        arcade.play_sound(tone.sound)
 
         if self.modes[self.mode%len(self.modes)] == "chord mode":
             self.chordChoice.keyPressedChord(key)
@@ -48,11 +50,19 @@ class Innovation(arcade.Window):
 
         if (key == arcade.key.X):
             self.mode += 1
+        
+        for tone in self.octave:
+            if not tone.pressed:
+                tone.isTonePressed(key)
 
 
     def on_key_release(self, key, modifier):
         if self.modes[self.mode%len(self.modes)] == "chord mode":
             self.chordChoice.keyReleasedChord(key)
+        
+        for tone in self.octave:
+            if tone.pressed:
+                tone.fixStuff(key)
 
 
     def randomTone(self):
@@ -68,9 +78,15 @@ class Tone:
         self.button = button
         self.sound = arcade.load_sound(sound)
         self.type = type
+        self.pressed = False
 
     def isTonePressed(self, button):
-        return self.button == button
+        self.pressed = self.button == button
+        return self.pressed
+    
+    def fixStuff(self, button):
+        print("shii " + self.key)
+        self.pressed = self.button != button
 
 
 class Chord:
@@ -107,6 +123,46 @@ class Chord:
 
     def isChordPressed(self):
         return (not self.timerIsDone and False not in self.buttonsState)
+
+
+class Piano2:
+    def __init__(self, correspondingTone, x, y, width, height):
+        self.correspondingTone = correspondingTone
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+
+    def display(self):
+        if self.correspondingTone.type == 1:
+            print()
+            if self.correspondingTone.pressed:
+                arcade.draw_rectangle_filled(self.x, self.y, self.width, self.height, arcade.color.GRAY)
+            else:
+                arcade.draw_rectangle_filled(self.x, self.y, self.width/1.03, self.height, arcade.color.WHITE)
+        if self.correspondingTone.type == 2:
+            if self.correspondingTone.pressed:
+                arcade.draw_rectangle_filled(self.x, self.y + 50, self.width/1.2, self.height/2, arcade.color.WHITE)
+            else:
+                arcade.draw_rectangle_outline(self.x, self.y + 50, self.width/1.2, self.height/2, arcade.color.GRAY)
+            
+
+class Piano:
+    def __init__(self, x, y, octave):
+        self.listPiano2 = []
+        self.x = x
+        self.y = y
+        width = 50
+        counter = 0
+        for x in octave:
+            self.toneX = self.x + width * counter
+            self.listPiano2.append(Piano2(x, self.toneX, self.y, width, 200))
+            counter += 1
+    
+    def display(self):
+        for pianoTile in self.listPiano2:
+            pianoTile.display()
+        
 
 
 def getOctave():
